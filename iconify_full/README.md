@@ -26,7 +26,7 @@ In your app `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  iconify_full: ^0.1.5
+  iconify_full: ^0.1.6
 ```
 
 Then:
@@ -327,7 +327,7 @@ Subset runs during the native build (Android/iOS) or run `dart run iconify_full:
 
 **Android: JVM target mismatch (Kotlin 21 vs Java 17)**
 
-- Update to `iconify_full` **0.1.5+** (plugin sets `kotlinOptions.jvmTarget = "17"`).
+- Update to `iconify_full` **0.1.6+** (Android plugin is Java-only; no Kotlin in this package).
 
 **CMake: `iconify_subset` does not exist**
 

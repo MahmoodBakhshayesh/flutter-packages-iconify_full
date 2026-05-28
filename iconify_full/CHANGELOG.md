@@ -1,8 +1,14 @@
+## 0.1.6
+
+### Fixed
+
+* **Android:** Replace Kotlin plugin stub with a **Java-only** implementation so `compileReleaseKotlin` vs `compileReleaseJavaWithJavac` JVM-target errors cannot occur on APK builds.
+
 ## 0.1.5
 
 ### Fixed
 
-* **Android:** Align Kotlin `jvmTarget` with Java 17 (fixes `compileReleaseKotlin` JVM 21 vs 17 mismatch on APK builds).
+* **Android:** Set Kotlin `jvmTarget` to 17 to match Java compile options.
 
 ## 0.1.4
 

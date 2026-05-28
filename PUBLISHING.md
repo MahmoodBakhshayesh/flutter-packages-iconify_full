@@ -22,7 +22,7 @@ dart pub publish --dry-run
 
 Fix any warnings (missing LICENSE, oversized files, etc.).
 
-## Publish 0.1.4
+## Publish 0.1.6
 
 ```bash
 cd iconify_full
@@ -30,7 +30,7 @@ dart pub publish --dry-run   # must show 0 warnings
 dart pub publish
 ```
 
-Confirm version **0.1.4** in `pubspec.yaml` and `CHANGELOG.md` before publishing.
+Confirm version **0.1.6** in `pubspec.yaml` and `CHANGELOG.md` before publishing.
 
 Confirm when prompted. You cannot unpublish; you can only publish new versions.
 
@@ -49,12 +49,12 @@ Only files under `iconify_full/` (the inner package folder):
 2. Add entry to `iconify_full/CHANGELOG.md`.
 3. `dart pub publish --dry-run` then `dart pub publish`.
 
-## pub.dev checklist (0.1.4)
+## pub.dev checklist (0.1.6)
 
 - [x] MIT `LICENSE` in package root
 - [x] `LICENSE-ICONS.md` for icon artwork
 - [x] README with install, debug cache, typed icons, codegen, troubleshooting
-- [x] `CHANGELOG.md` with 0.1.4 release notes
+- [x] `CHANGELOG.md` with 0.1.6 release notes
 - [x] `description` in pubspec (≤ 180 chars for display)
 - [x] `topics` in pubspec
 - [x] Executables: `iconify_init`, `iconify_download`, `iconify_codegen`, `iconify_subset`, `iconify_apply_hooks`, `iconify_build`
@@ -68,10 +68,14 @@ Users install with:
 
 ```yaml
 dependencies:
-  iconify_full: ^0.1.4
+  iconify_full: ^0.1.6
 ```
 
 Point `documentation` on pub.dev to your README or GitHub.
+
+## 0.1.6 highlights (for release notes / pub.dev)
+
+- **Android:** Java-only plugin — fixes JVM 17/21 APK build failures
 
 ## 0.1.4 highlights (for release notes / pub.dev)
 
