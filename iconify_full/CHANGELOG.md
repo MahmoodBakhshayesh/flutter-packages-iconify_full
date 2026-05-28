@@ -1,3 +1,9 @@
+## 0.1.5
+
+### Fixed
+
+* **Android:** Align Kotlin `jvmTarget` with Java 17 (fixes `compileReleaseKotlin` JVM 21 vs 17 mismatch on APK builds).
+
 ## 0.1.4
 
 ### Added
