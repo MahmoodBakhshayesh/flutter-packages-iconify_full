@@ -37,6 +37,7 @@ Future<void> runIconifySubset({
       await mergePubspecAssets(
         File(p.join(projectDir.path, 'pubspec.yaml')),
         assetsSubdir,
+        assetPaths: const [],
       );
     }
     return;
@@ -86,22 +87,29 @@ Future<void> runIconifySubset({
     await mergePubspecAssets(
       File(p.join(projectDir.path, 'pubspec.yaml')),
       assetsSubdir,
+      assetPaths: manifest.values.toList(),
     );
-    info('Updated pubspec.yaml assets');
+    info('Updated pubspec.yaml assets (${manifest.length} files)');
   }
 
   info('Subset complete (${manifest.length} assets).');
 }
 
-/// Adds `assets/iconify/` to the app pubspec if missing.
-Future<void> mergePubspecAssets(File pubspecFile, String assetsDir) async {
-  final lines = await pubspecFile.readAsLines();
-  final assetLine = '    - $assetsDir/';
+const _assetsBegin = '# >>> iconify_full assets';
+const _assetsEnd = '# <<< iconify_full assets';
+
+/// Registers subsetted SVG paths in pubspec (explicit paths — required for subfolders).
+Future<void> mergePubspecAssets(
+  File pubspecFile,
+  String assetsDir, {
+  List<String> assetPaths = const [],
+}) async {
+  var lines = await pubspecFile.readAsLines();
+  lines = _removeGeneratedAssetBlock(lines);
+
   final flutterIdx = lines.indexWhere((l) => l == 'flutter:');
   if (flutterIdx == -1) {
-    lines.addAll(['', 'flutter:', '  assets:', assetLine]);
-    await pubspecFile.writeAsString('${lines.join('\n')}\n');
-    return;
+    throw StateError('pubspec.yaml has no flutter: section');
   }
 
   var assetsIdx = -1;
@@ -117,14 +125,36 @@ Future<void> mergePubspecAssets(File pubspecFile, String assetsDir) async {
     }
   }
 
+  final block = <String>[
+    _assetsBegin,
+    ...assetPaths.map((p) => '    - $p'),
+    _assetsEnd,
+  ];
+
   if (assetsIdx == -1) {
     lines.insert(flutterIdx + 1, '  assets:');
-    lines.insert(flutterIdx + 2, assetLine);
-  } else if (!lines.any((l) => l.trim() == assetLine.trim())) {
-    lines.insert(assetsIdx + 1, assetLine);
+    lines.insertAll(flutterIdx + 2, block);
+  } else {
+    lines.insertAll(assetsIdx + 1, block);
   }
 
   await pubspecFile.writeAsString('${lines.join('\n')}\n');
-  // Validate YAML
   loadYaml(await pubspecFile.readAsString());
+}
+
+List<String> _removeGeneratedAssetBlock(List<String> lines) {
+  final out = <String>[];
+  var skip = false;
+  for (final line in lines) {
+    if (line.trim() == _assetsBegin) {
+      skip = true;
+      continue;
+    }
+    if (line.trim() == _assetsEnd) {
+      skip = false;
+      continue;
+    }
+    if (!skip) out.add(line);
+  }
+  return out;
 }

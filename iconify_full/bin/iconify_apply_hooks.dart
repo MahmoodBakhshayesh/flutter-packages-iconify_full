@@ -13,17 +13,16 @@ Future<void> main(List<String> arguments) async {
 
   final project = Directory(p.normalize(args['project'] as String));
 
-  _patchParentCmake(File(p.join(project.path, 'windows', 'CMakeLists.txt')));
-  _patchParentCmake(File(p.join(project.path, 'linux', 'CMakeLists.txt')));
-  _patchRunnerCmake(File(p.join(project.path, 'windows', 'runner', 'CMakeLists.txt')));
-  _patchRunnerCmake(File(p.join(project.path, 'linux', 'runner', 'CMakeLists.txt')));
+  _patchPlatformCmake(File(p.join(project.path, 'windows', 'CMakeLists.txt')));
+  _patchPlatformCmake(File(p.join(project.path, 'linux', 'CMakeLists.txt')));
+  _stripRunnerHook(File(p.join(project.path, 'windows', 'runner', 'CMakeLists.txt')));
+  _stripRunnerHook(File(p.join(project.path, 'linux', 'runner', 'CMakeLists.txt')));
 
-  stdout.writeln('iconify_full: desktop CMake hooks applied under ${project.path}');
-  stdout.writeln('Android/iOS subset runs automatically via the iconify_full plugin.');
+  stdout.writeln('iconify_full: desktop hooks applied under ${project.path}');
+  stdout.writeln('Subset runs before flutter_assemble (assets are bundled correctly).');
 }
 
-/// Top-level windows/linux CMakeLists — app root is one level up.
-String get _parentHookBlock => r'''
+String get _subsetTargetBlock => r'''
 set(ICONIFY_APP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../iconify_full/.iconify_cache")
 if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
@@ -45,75 +44,54 @@ if(NOT TARGET iconify_subset)
 endif()
 '''.trim();
 
-/// runner/CMakeLists — app root is two levels up; defines target if parent did not.
-String get _runnerHookBlock => r'''
-set(ICONIFY_APP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../iconify_full/.iconify_cache")
-if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
-  set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
-endif()
-if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
-  set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/.iconify_cache")
-endif()
-if(NOT TARGET iconify_subset)
-  add_custom_target(iconify_subset
-    COMMAND dart run iconify_full:iconify_subset
-      --project "${ICONIFY_APP_ROOT}"
-      --cache "${ICONIFY_CACHE_DIR}"
-      --no-pubspec
-    WORKING_DIRECTORY "${ICONIFY_APP_ROOT}"
-    COMMENT "Subsetting Iconify SVG assets (iconify_full)"
-    VERBATIM
-  )
-endif()
-add_dependencies(${BINARY_NAME} iconify_subset)
-'''.trim();
+const _assembleDep = 'add_dependencies(flutter_assemble iconify_subset)';
 
-void _patchParentCmake(File file) {
+void _patchPlatformCmake(File file) {
   if (!file.existsSync()) {
     stdout.writeln('skip (missing): ${file.path}');
     return;
   }
   var content = file.readAsStringSync();
+
+  // Upgrade: remove runner-only hooks from parent if present.
   if (content.contains(_begin)) {
-    _stripOldBlock(file);
+    _stripBlock(file);
     content = file.readAsStringSync();
   }
-  if (content.contains('add_custom_target(iconify_subset')) {
-    stdout.writeln('already has iconify_subset target: ${file.path}');
-    return;
-  }
+
   final projectLine = _findProjectLine(content);
   if (projectLine == null) {
-    stdout.writeln('warn: no project() line in ${file.path}');
+    stdout.writeln('warn: no project() in ${file.path}');
     return;
   }
-  _insertAfter(file, content, projectLine, _parentHookBlock);
+
+  if (!content.contains('add_custom_target(iconify_subset')) {
+    _insertAfter(file, content, projectLine, _subsetTargetBlock);
+    content = file.readAsStringSync();
+  }
+
+  // CMake variable — must be raw string (not Dart interpolation).
+  const flutterSubdir = r'add_subdirectory(${FLUTTER_MANAGED_DIR})';
+  if (content.contains(_assembleDep)) {
+    stdout.writeln('already patched: ${file.path}');
+    return;
+  }
+  if (content.contains(flutterSubdir)) {
+    _insertAfter(file, content, flutterSubdir, _assembleDep);
+  } else if (content.contains('add_subdirectory("flutter")')) {
+    _insertAfter(file, content, 'add_subdirectory("flutter")', _assembleDep);
+  } else {
+    stdout.writeln('warn: flutter subdirectory anchor missing in ${file.path}');
+  }
 }
 
-void _patchRunnerCmake(File file) {
-  if (!file.existsSync()) {
-    stdout.writeln('skip (missing): ${file.path}');
-    return;
-  }
-  var content = file.readAsStringSync();
+void _stripRunnerHook(File file) {
+  if (!file.existsSync()) return;
+  final content = file.readAsStringSync();
   if (content.contains(_begin)) {
-    // Upgrade old hooks that only had add_dependencies.
-    if (!content.contains('add_custom_target(iconify_subset')) {
-      stdout.writeln('upgrading runner hook: ${file.path}');
-      _stripOldBlock(file);
-      content = file.readAsStringSync();
-    } else {
-      stdout.writeln('already patched: ${file.path}');
-      return;
-    }
+    _stripBlock(file);
+    stdout.writeln('removed runner hook (use parent CMake): ${file.path}');
   }
-  const anchor = r'apply_standard_settings(${BINARY_NAME})';
-  if (!content.contains(anchor)) {
-    stdout.writeln('warn: anchor not found in ${file.path}');
-    return;
-  }
-  _insertAfter(file, content, anchor, _runnerHookBlock);
 }
 
 String? _findProjectLine(String content) {
@@ -126,14 +104,19 @@ String? _findProjectLine(String content) {
   return null;
 }
 
-void _stripOldBlock(File file) {
+void _stripBlock(File file) {
   var content = file.readAsStringSync();
   if (!content.contains(_begin)) return;
   final pattern = RegExp(
     r'# >>> iconify_full\r?\n.*?# <<< iconify_full\r?\n?',
     dotAll: true,
   );
-  file.writeAsStringSync(content.replaceAll(pattern, ''));
+  content = content.replaceAll(pattern, '');
+  content = content.replaceAll(
+    RegExp(r'\n*add_dependencies\(flutter_assemble iconify_subset\)\r?\n?'),
+    '\n',
+  );
+  file.writeAsStringSync(content);
 }
 
 void _insertAfter(
@@ -145,7 +128,9 @@ void _insertAfter(
   final idx = content.indexOf(after);
   if (idx == -1) return;
   final insertAt = idx + after.length;
-  final block = '\n$_begin\n$insert\n$_end\n';
+  final block = insert == _assembleDep
+      ? '\n# iconify_full: subset before asset bundle\n$insert\n'
+      : '\n$_begin\n$insert\n$_end\n';
   final updated =
       content.substring(0, insertAt) + block + content.substring(insertAt);
   file.writeAsStringSync(updated);

@@ -5,9 +5,10 @@
 const Map<String, String> kIconifyManifest = {
   'mdi:heart': 'assets/iconify/mdi/heart.svg',
   'mdi:home': 'assets/iconify/mdi/home.svg',
+  'solar:accessibility-bold': 'assets/iconify/solar/accessibility-bold.svg',
   'solar:star-bold': 'assets/iconify/solar/star-bold.svg',
   'tabler:brand-flutter': 'assets/iconify/tabler/brand-flutter.svg',
 };
+
 /// Resolves an asset path for [id], or null if not in the subset.
 String? iconifyAssetFor(String id) => kIconifyManifest[id];
-

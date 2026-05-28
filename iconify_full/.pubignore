@@ -10,3 +10,4 @@ build/
 # Not needed on pub.dev
 .metadata
 **/test/goldens/
+example/

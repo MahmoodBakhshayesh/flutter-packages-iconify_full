@@ -33,8 +33,9 @@ Future<void> runIconifyInit({
     await mergePubspecAssets(
       File(p.join(projectDir.path, 'pubspec.yaml')),
       config.assetsDir,
+      assetPaths: const [],
     );
-    info('Updated pubspec.yaml (assets: ${config.assetsDir}/)');
+    info('Updated pubspec.yaml (run subset after adding icons)');
   }
 
   final assetsDir = Directory(p.join(projectDir.path, config.assetsDir));

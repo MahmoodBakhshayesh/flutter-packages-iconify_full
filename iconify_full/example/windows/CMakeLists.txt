@@ -4,7 +4,10 @@ project(example LANGUAGES CXX)
 
 # >>> iconify_full
 set(ICONIFY_APP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
-set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
+set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../../.iconify_cache")
+if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
+  set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
+endif()
 if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
   set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/.iconify_cache")
 endif()
@@ -67,6 +70,9 @@ endfunction()
 # Flutter library and tool build rules.
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
+
+# iconify_full: subset before asset bundle
+add_dependencies(flutter_assemble iconify_subset)
 
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")

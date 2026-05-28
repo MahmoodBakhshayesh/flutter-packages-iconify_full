@@ -22,7 +22,7 @@ dart pub publish --dry-run
 
 Fix any warnings (missing LICENSE, oversized files, etc.).
 
-## Publish 0.1.1
+## Publish 0.1.3
 
 ```bash
 cd iconify_full
@@ -30,7 +30,7 @@ dart pub publish --dry-run   # must show 0 warnings
 dart pub publish
 ```
 
-Confirm version `0.1.1` in `pubspec.yaml` and `CHANGELOG.md` before publishing.
+Confirm version `0.1.3` in `pubspec.yaml` and `CHANGELOG.md` before publishing.
 
 Confirm when prompted. You cannot unpublish; you can only publish new versions.
 

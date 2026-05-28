@@ -4,7 +4,10 @@ project(runner LANGUAGES CXX)
 
 # >>> iconify_full
 set(ICONIFY_APP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
-set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
+set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../../.iconify_cache")
+if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
+  set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
+endif()
 if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
   set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/.iconify_cache")
 endif()
@@ -68,6 +71,8 @@ endfunction()
 # Flutter library and tool build rules.
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
+
+add_dependencies(flutter_assemble iconify_subset)
 
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)

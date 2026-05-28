@@ -1,3 +1,9 @@
+## 0.1.3
+
+* **Fix:** Desktop subset runs before `flutter_assemble` so SVGs are included in `flutter_assets`.
+* Subset writes **explicit** asset paths in `pubspec.yaml` (fixes Flutter not bundling `assets/iconify/*` subfolders).
+* Fix `iconify_apply_hooks` Dart analyze error (CMake `FLUTTER_MANAGED_DIR` anchor uses raw string).
+
 ## 0.1.2
 
 * CMake / `iconify_apply_hooks`: try `../iconify_full/.iconify_cache` (monorepo layout like brewlab).

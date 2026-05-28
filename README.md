@@ -5,11 +5,11 @@ Flutter package for offline [Iconify](https://icon-sets.iconify.design/) icons w
 ## Repository layout
 
 ```
-iconify_full/           ← you are here (monorepo root)
-  .iconify_cache/       ← offline icons (gitignored, ~500MB+)
-  iconify_full/         ← Dart package published to pub.dev
-  example/              ← demo Flutter app
-  PUBLISHING.md         ← how to publish to pub.dev
+iconify_full/              ← repo root
+  .iconify_cache/          ← offline icons (gitignored)
+  iconify_full/            ← Dart package (published to pub.dev)
+    example/               ← demo app
+  PUBLISHING.md
 ```
 
 ## Quick start

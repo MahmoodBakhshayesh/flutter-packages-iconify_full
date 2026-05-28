@@ -76,8 +76,11 @@ class _IconifyExampleAppState extends State<IconifyExampleApp> {
                     runSpacing: 24,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
+                      IconifyIcon("solar:accessibility-bold"),
+
                       _labeled('mdi:home', const IconifyIcon('mdi:home')),
                       _labeled(
+
                         'mdi:heart',
                         const IconifyIcon('mdi:heart', color: Colors.red),
                       ),
