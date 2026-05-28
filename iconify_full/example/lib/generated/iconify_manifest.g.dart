@@ -5,7 +5,7 @@
 const Map<String, String> kIconifyManifest = {
   'mdi:heart': 'assets/iconify/mdi/heart.svg',
   'mdi:home': 'assets/iconify/mdi/home.svg',
-  'solar:accessibility-bold': 'assets/iconify/solar/accessibility-bold.svg',
+  'solar:accumulator-bold': 'assets/iconify/solar/accumulator-bold.svg',
   'solar:star-bold': 'assets/iconify/solar/star-bold.svg',
   'tabler:brand-flutter': 'assets/iconify/tabler/brand-flutter.svg',
 };

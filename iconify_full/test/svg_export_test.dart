@@ -31,6 +31,25 @@ void main() {
     expect(svg, contains('currentColor'));
   });
 
+  test('mask icons keep #fff/#000 inside mask', () {
+    final svg = iconDataToSvg(
+      {
+        'body':
+            '<defs><mask id="m"><g fill="none">'
+            '<path fill="#fff" d="M10 10"/>'
+            '<path fill="#000" fill-rule="evenodd" d="M12 12"/>'
+            '</g></mask></defs>'
+            '<path fill="#000" d="M0 0h24v24H0z" mask="url(#m)"/>',
+      },
+      defaultWidth: 24,
+      defaultHeight: 24,
+    );
+    expect(svg, contains('fill="#fff"'));
+    expect(svg, contains('fill="#000"'));
+    expect(svg, contains('fill="currentColor"'));
+    expect(svg, isNot(contains('mask id="m"><g fill="none"><path fill="currentColor"')));
+  });
+
   test('parseIconId', () {
     expect(parseIconId('mdi:home'), ('mdi', 'home'));
     expect(parseIconId('mdi/home'), ('mdi', 'home'));

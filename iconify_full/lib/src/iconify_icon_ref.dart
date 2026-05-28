@@ -4,6 +4,14 @@ import 'builder/svg_export.dart';
 class IconifyIconRef {
   const IconifyIconRef(this.prefix, this.name);
 
+  factory IconifyIconRef.fromId(String id) {
+    final parsed = parseIconId(id);
+    if (parsed == null) {
+      throw ArgumentError('Invalid Iconify id: $id (expected prefix:name)');
+    }
+    return IconifyIconRef(parsed.$1, parsed.$2);
+  }
+
   final String prefix;
   final String name;
 

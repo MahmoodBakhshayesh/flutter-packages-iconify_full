@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+import 'icons_catalog_generator.dart' show loadCatalogIconRefMap;
+import 'icons_generator.dart' show generateIconifyIconsDart, loadIconifiesConstMap;
 import 'manifest_generator.dart';
 import 'scan.dart';
 import 'svg_export.dart';
@@ -13,13 +15,21 @@ Future<void> runIconifySubset({
   required Directory cacheDir,
   String assetsSubdir = 'assets/iconify',
   String manifestPath = 'lib/generated/iconify_manifest.g.dart',
+  String iconsPath = 'lib/generated/iconify_icons.g.dart',
   bool updatePubspec = true,
   void Function(String message)? log,
 }) async {
   void info(String msg) => log?.call(msg);
 
   final libDir = Directory(p.join(projectDir.path, 'lib'));
-  final ids = scanProjectForIconIds(libDir);
+  final catalogDir = Directory(
+    p.join(projectDir.path, 'lib/generated/iconify_catalog'),
+  );
+  final ids = scanProjectForIconIds(
+    libDir,
+    iconifiesMap: loadIconifiesConstMap(projectDir, iconsPath: iconsPath),
+    catalogMap: loadCatalogIconRefMap(catalogDir),
+  );
   if (ids.isEmpty) {
     info('No Iconify icon references found under lib/.');
     final manifestFile = File(p.join(projectDir.path, manifestPath));
@@ -82,6 +92,11 @@ Future<void> runIconifySubset({
   await manifestFile.parent.create(recursive: true);
   await manifestFile.writeAsString(generateIconifyManifestDart(manifest));
   info('Wrote ${manifestFile.path}');
+
+  final iconsFile = File(p.join(projectDir.path, iconsPath));
+  await iconsFile.parent.create(recursive: true);
+  await iconsFile.writeAsString(generateIconifyIconsDart(manifest.keys));
+  info('Wrote ${iconsFile.path}');
 
   if (updatePubspec) {
     await mergePubspecAssets(

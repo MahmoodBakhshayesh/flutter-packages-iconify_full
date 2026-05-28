@@ -8,8 +8,10 @@ Use [Iconify](https://icon-sets.iconify.design/) icons in Flutter as **themed SV
 
 - **200+ icon sets**, 200k+ icons — same catalogs as [icon-sets.iconify.design](https://icon-sets.iconify.design/)
 - **Offline cache** — download once per machine or CI
-- **Themed SVG** — `IconifyTheme` + `ColorFilter` tinting for monochrome sets
-- **Tree-shaking** — subset copies only `IconifyIcon('prefix:name')` used in `lib/`
+- **Themed SVG** — `IconifyTheme` + tinting for monochrome sets
+- **Debug cache** — iterate on new icons without re-running subset on every `flutter run`
+- **Typed icons** — generated `Iconifies.*` (subset) or `Mdi.*` / `Solar.*` (full catalog via `iconify_codegen`)
+- **Tree-shaking** — subset copies only icons you reference in `lib/`
 - **Auto subset on build** — Android & iOS via plugin; Windows/Linux via CMake; web via `iconify_build`
 
 ---
@@ -24,7 +26,7 @@ In your app `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  iconify_full: ^0.1.3
+  iconify_full: ^0.1.4
 ```
 
 Then:
@@ -57,10 +59,23 @@ import 'package:iconify_full/iconify_full.dart';
 import 'generated/iconify_manifest.g.dart' as iconify_manifest;
 
 void main() {
-  registerIconifyManifest(iconify_manifest.iconifyAssetFor);
+  setupIconifyFull(
+    manifest: iconify_manifest.iconifyAssetFor,
+    // Debug only — skip re-subset while iterating (see below)
+    debugCachePath: '.iconify_cache',
+  );
   runApp(const MyApp());
 }
 ```
+
+**Debug vs release**
+
+| Mode | What you do when adding a new icon |
+|------|-------------------------------------|
+| **Debug** (`flutter run`) | Download the set once, point `debugCachePath` at `.iconify_cache`, use `IconifyIcon('prefix:name')` — **no subset needed** while iterating |
+| **Release** (`flutter build …`) | Subset runs automatically on Android/iOS/desktop (or run `iconify_subset` / `iconify_build` for web) — only referenced icons ship |
+
+In release builds, `registerIconifyDebugCache` is ignored; icons must be in the generated manifest.
 
 ### Step 4 — Download the icon cache (once per machine)
 
@@ -118,6 +133,7 @@ iconify_full:
 
 ```dart
 import 'package:iconify_full/iconify_full.dart';
+import 'generated/iconify_icons.g.dart'; // after first subset
 
 IconifyTheme(
   data: IconifyThemeData(
@@ -127,7 +143,7 @@ IconifyTheme(
   child: Row(
     children: [
       IconifyIcon('mdi:home'),
-      IconifyIcon('mdi:heart', color: Colors.red),
+      IconifyIcon.named(Iconifies.mdi_heart), // typed, autocomplete-friendly
       IconifyIcon('tabler:settings', size: 32),
     ],
   ),
@@ -135,6 +151,35 @@ IconifyTheme(
 ```
 
 Icon ids use the form **`prefix:name`** (same as Iconify), e.g. `mdi:home`, `solar:star-bold`.
+
+**Two typed options**
+
+| Source | When | Usage |
+|--------|------|--------|
+| **`iconify_icons.g.dart`** (subset) | Small — only icons you use | `IconifyIcon.named(Iconifies.mdi_home)` |
+| **`iconify_catalog/`** (codegen) | Full set(s) from your cache | `IconifyIcon.named(Mdi.home)` |
+
+The first time you add a brand-new icon with subset-only typing, use the string form once, run subset, then switch to `Iconifies.*`.
+
+### Full catalog typing (all icons in cache)
+
+You **cannot** ship ~200k icons inside the `iconify_full` pub package (size, analyzer, pub.dev). Generate them **in your app** after download:
+
+```bash
+dart run iconify_full:iconify_download -p mdi -p solar   # or full cache
+dart run iconify_full:iconify_codegen -P mdi -P solar    # one Dart file per set
+```
+
+This writes `lib/generated/iconify_catalog/mdi.dart`, `solar.dart`, and a barrel `iconify_catalog.dart`:
+
+```dart
+import 'generated/iconify_catalog/iconify_catalog.dart';
+
+const IconifyIcon.named(Mdi.home);
+const IconifyIcon.named(Solar.star_bold);
+```
+
+Add `lib/generated/iconify_catalog/` to **`.gitignore`** if you generate many sets (can be 10MB+ of Dart). Regenerate when you update the cache.
 
 ### Step 7 — Subset icons (fills the manifest & assets)
 
@@ -155,9 +200,9 @@ dart run iconify_full:iconify_subset
 
 This:
 
-1. Scans `lib/**/*.dart` for `IconifyIcon('…')` references
+1. Scans `lib/**/*.dart` for `IconifyIcon('…')` and `Iconifies.*` references
 2. Copies matching SVGs to `assets/iconify/`
-3. Writes `lib/generated/iconify_manifest.g.dart`
+3. Writes `lib/generated/iconify_manifest.g.dart` and `iconify_icons.g.dart`
 4. Adds `assets/iconify/` to `pubspec.yaml` if missing
 
 After you add `IconifyIcon('prefix:name')` in `lib/`, subset **replaces** the starter manifest with real entries and copies SVGs into `assets/iconify/`. This also runs automatically on native builds (see table below).
@@ -227,6 +272,7 @@ Subset runs during the native build (Android/iOS) or run `dart run iconify_full:
 |---------|---------|
 | `dart run iconify_full:iconify_init` | **First-time:** create empty `iconify_manifest.g.dart` |
 | `dart run iconify_full:iconify_download` | Download all (or `-p prefix`) sets to cache |
+| `dart run iconify_full:iconify_codegen` | Generate typed `Mdi` / `Solar` classes from cache |
 | `dart run iconify_full:iconify_subset` | Subset used icons into app assets |
 | `dart run iconify_full:iconify_apply_hooks` | Patch Windows/Linux CMake (once per app) |
 | `dart run iconify_full:iconify_build -- …` | Subset + `flutter …` (good for web) |
@@ -241,14 +287,25 @@ Subset runs during the native build (Android/iOS) or run `dart run iconify_full:
 
 | Type | Role |
 |------|------|
-| `IconifyIcon('mdi:home')` | Widget — loads SVG from manifest |
+| `IconifyIcon('mdi:home')` | Widget — manifest assets (release) or cache (debug) |
+| `IconifyIcon.named(Iconifies.mdi_home)` | Widget with generated typed ref |
 | `IconifyTheme` / `IconifyThemeData` | Default color, size, fit |
-| `registerIconifyManifest(...)` | Connect generated `iconifyAssetFor` |
-| `IconifyIconRef('mdi', 'home')` | Typed reference (optional) |
+| `setupIconifyFull(...)` | Manifest + optional `debugCachePath` |
+| `Iconifies` / `Mdi` / `Solar` (generated) | Typed `IconifyIconRef` constants |
+| `IconifyIconRef` | Manual typed ref (`prefix` + `name`) |
 
 ---
 
 ## Troubleshooting
+
+**Solar (or other) icons show blank / nothing**
+
+- Often a **stale cache** from before 0.1.4 mask export fix. Re-download the set and subset:
+  ```bash
+  dart run iconify_full:iconify_download -p solar --force
+  dart run iconify_full:iconify_subset
+  ```
+- Confirm `assets/iconify/solar/your-icon.svg` contains `fill="#fff"` inside `<mask>`, not only `fill="currentColor"`.
 
 **`generated/iconify_manifest.g.dart` does not exist**
 

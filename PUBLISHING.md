@@ -22,7 +22,7 @@ dart pub publish --dry-run
 
 Fix any warnings (missing LICENSE, oversized files, etc.).
 
-## Publish 0.1.3
+## Publish 0.1.4
 
 ```bash
 cd iconify_full
@@ -30,7 +30,7 @@ dart pub publish --dry-run   # must show 0 warnings
 dart pub publish
 ```
 
-Confirm version `0.1.3` in `pubspec.yaml` and `CHANGELOG.md` before publishing.
+Confirm version **0.1.4** in `pubspec.yaml` and `CHANGELOG.md` before publishing.
 
 Confirm when prompted. You cannot unpublish; you can only publish new versions.
 
@@ -49,16 +49,17 @@ Only files under `iconify_full/` (the inner package folder):
 2. Add entry to `iconify_full/CHANGELOG.md`.
 3. `dart pub publish --dry-run` then `dart pub publish`.
 
-## pub.dev checklist
+## pub.dev checklist (0.1.4)
 
 - [x] MIT `LICENSE` in package root
 - [x] `LICENSE-ICONS.md` for icon artwork
-- [x] README with install + usage + licensing
-- [x] `CHANGELOG.md`
+- [x] README with install, debug cache, typed icons, codegen, troubleshooting
+- [x] `CHANGELOG.md` with 0.1.4 release notes
 - [x] `description` in pubspec (≤ 180 chars for display)
 - [x] `topics` in pubspec
-- [ ] Your real `repository` URL in pubspec
-- [ ] `dart pub publish --dry-run` passes
+- [x] Executables: `iconify_init`, `iconify_download`, `iconify_codegen`, `iconify_subset`, `iconify_apply_hooks`, `iconify_build`
+- [ ] Your real `repository` URL in pubspec (verify GitHub links)
+- [ ] `dart pub publish --dry-run` passes with 0 warnings
 - [ ] Example app runs (optional but recommended)
 
 ## After publish
@@ -67,7 +68,13 @@ Users install with:
 
 ```yaml
 dependencies:
-  iconify_full: ^0.1.0
+  iconify_full: ^0.1.4
 ```
 
-Point `documentation` on pub.dev to your README anchor or GitHub.
+Point `documentation` on pub.dev to your README or GitHub.
+
+## 0.1.4 highlights (for release notes / pub.dev)
+
+- Debug: load new icons from `.iconify_cache` without subset on every `flutter run`
+- Typed icons: `Iconifies.*` (subset) and `iconify_codegen` for full `Mdi.*` / `Solar.*` catalogs
+- Fix: Solar and mask-based SVG sets render correctly after re-download + subset

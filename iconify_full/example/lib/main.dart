@@ -1,10 +1,16 @@
+import 'package:example/generated/iconify_icons.g.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_full/iconify_full.dart';
 
+import 'generated/iconify_catalog/solar.dart';
 import 'generated/iconify_manifest.g.dart' as manifest;
 
 void main() {
-  registerIconifyManifest(manifest.iconifyAssetFor);
+  setupIconifyFull(
+    manifest: manifest.iconifyAssetFor,
+    // Debug: load SVGs from cache when not yet subset into assets.
+    debugCachePath: '../../.iconify_cache',
+  );
   runApp(const IconifyExampleApp());
 }
 
@@ -67,8 +73,8 @@ class _IconifyExampleAppState extends State<IconifyExampleApp> {
                 padding: const EdgeInsets.all(24),
                 children: [
                   const Text(
-                    'Icons inherit IconifyTheme color & size. '
-                    'Only referenced icons are bundled (run iconify_subset).',
+                    'Debug: icons load from .iconify_cache without re-running subset. '
+                    'Release builds bundle only subset assets.',
                   ),
                   const SizedBox(height: 24),
                   Wrap(
@@ -76,21 +82,24 @@ class _IconifyExampleAppState extends State<IconifyExampleApp> {
                     runSpacing: 24,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      IconifyIcon("solar:accessibility-bold"),
 
-                      _labeled('mdi:home', const IconifyIcon('mdi:home')),
+
+
+
+                      IconifyIcon("bi:amd"),
+                      IconifyIcon.named(Solar.accumulator_bold,color: Colors.red,),
+                      _labeled('mdi:home', IconifyIcon('mdi:home')),
                       _labeled(
-
                         'mdi:heart',
-                        const IconifyIcon('mdi:heart', color: Colors.red),
+                        IconifyIcon('mdi:heart', color: Colors.red),
                       ),
                       _labeled(
                         'tabler:brand-flutter',
-                        const IconifyIcon('tabler:brand-flutter'),
+                        IconifyIcon('tabler:brand-flutter'),
                       ),
                       _labeled(
                         'solar:star-bold',
-                        const IconifyIcon('solar:star-bold', size: 56),
+                        IconifyIcon('solar:star-bold', size: 56),
                       ),
                     ],
                   ),

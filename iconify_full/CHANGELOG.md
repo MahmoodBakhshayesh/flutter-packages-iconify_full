@@ -1,3 +1,29 @@
+## 0.1.4
+
+### Added
+
+* **`setupIconifyFull`** — register manifest and optional **`debugCachePath`** in one call.
+* **Debug cache** — `registerIconifyDebugCache` loads SVGs from `.iconify_cache` during `flutter run` when an icon is not in the manifest yet (no subset on every new icon in debug).
+* **Typed icons (subset)** — `iconify_subset` generates `lib/generated/iconify_icons.g.dart` with `Iconifies.*` constants; use `IconifyIcon.named(Iconifies.mdi_home)`.
+* **Full catalog typing** — `dart run iconify_full:iconify_codegen` generates per-set classes (`Mdi.home`, `Solar.star_bold`, …) from your downloaded cache under `lib/generated/iconify_catalog/`.
+* **`IconifyIconRef`** and **`IconifyIcon.named`** for compile-time typed icons.
+* Scanner recognizes `IconifyIcon('…')`, `Iconifies.*`, `IconifyIcon.named(…)`, and catalog refs like `Mdi.home`.
+
+### Fixed
+
+* **Solar / mask icons invisible** — SVG export no longer replaces `#fff` / `#000` inside `<mask>` with `currentColor`. Re-run `iconify_download` and `iconify_subset` for affected sets (e.g. `solar`).
+* Tint applied via `SvgPicture` `colorFilter` instead of wrapping in `ColorFiltered` (better SVG rendering).
+
+### Migration from 0.1.3
+
+1. Bump dependency: `iconify_full: ^0.1.4`
+2. Optional: switch `registerIconifyManifest` to `setupIconifyFull(..., debugCachePath: '.iconify_cache')`
+3. If you use **Solar** or other mask-based sets, re-download and subset:
+   ```bash
+   dart run iconify_full:iconify_download -p solar --force
+   dart run iconify_full:iconify_subset
+   ```
+
 ## 0.1.3
 
 * **Fix:** Desktop subset runs before `flutter_assemble` so SVGs are included in `flutter_assets`.

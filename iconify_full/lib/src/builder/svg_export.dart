@@ -55,8 +55,27 @@ double? _toDouble(Object? value) {
 }
 
 /// Replaces solid fills/strokes with currentColor for theme tinting.
+///
+/// Skips `<mask>` blocks so luminance masks (e.g. Solar `#fff` / `#000`) keep working.
 String _applyCurrentColor(String body) {
-  return body
+  final maskBlocks = <String>[];
+  final withoutMasks = body.replaceAllMapped(
+    RegExp(r'<mask\b[^>]*>[\s\S]*?</mask>', caseSensitive: false),
+    (match) {
+      maskBlocks.add(match.group(0)!);
+      return '{{ICONIFY_MASK_${maskBlocks.length - 1}}}';
+    },
+  );
+
+  var processed = _replacePaintWithCurrentColor(withoutMasks);
+  for (var i = 0; i < maskBlocks.length; i++) {
+    processed = processed.replaceFirst('{{ICONIFY_MASK_$i}}', maskBlocks[i]);
+  }
+  return processed;
+}
+
+String _replacePaintWithCurrentColor(String fragment) {
+  return fragment
       .replaceAllMapped(
         RegExp(
           r'''fill="(?!none|currentColor)([^"]+)"''',
