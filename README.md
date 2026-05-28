@@ -17,12 +17,14 @@ iconify_full/           ← you are here (monorepo root)
 See the **[package README](iconify_full/README.md)** for full step-by-step usage.
 
 ```bash
-cd iconify_full
+cd example
 flutter pub get
+dart run iconify_full:iconify_init
+
+cd ../iconify_full
 dart run :iconify_download --cache ../.iconify_cache
 
 cd ../example
-flutter pub get
 dart run iconify_full:iconify_subset
 flutter run
 ```

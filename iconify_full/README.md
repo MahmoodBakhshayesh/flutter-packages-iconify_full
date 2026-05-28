@@ -24,7 +24,7 @@ In your app `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  iconify_full: ^0.1.0
+  iconify_full: ^0.1.1
 ```
 
 Then:
@@ -33,7 +33,36 @@ Then:
 flutter pub get
 ```
 
-### Step 2 — Download the icon cache (once per machine)
+### Step 2 — Create the manifest (first time only)
+
+Before `iconify_manifest.g.dart` exists, your app cannot import it. Bootstrap an **empty starter** file:
+
+```bash
+cd your_app   # folder with pubspec.yaml
+dart run iconify_full:iconify_init
+```
+
+This creates:
+
+- `lib/generated/iconify_manifest.g.dart` — empty map, compiles immediately
+- `assets/iconify/` — placeholder folder
+- `flutter: assets:` entry in `pubspec.yaml` (if missing)
+
+Use `--force` to replace an existing manifest with a fresh starter.
+
+### Step 3 — Register the manifest in `main.dart`
+
+```dart
+import 'package:iconify_full/iconify_full.dart';
+import 'generated/iconify_manifest.g.dart' as iconify_manifest;
+
+void main() {
+  registerIconifyManifest(iconify_manifest.iconifyAssetFor);
+  runApp(const MyApp());
+}
+```
+
+### Step 4 — Download the icon cache (once per machine)
 
 From your **app project root** (where your app `pubspec.yaml` lives), or from a monorepo root:
 
@@ -52,7 +81,7 @@ This downloads JSON from [iconify/icon-sets](https://github.com/iconify/icon-set
 
 Add `.iconify_cache/` to `.gitignore` (recommended). Cache CI separately — see [CI/CD](#cicd) below.
 
-### Step 3 — Configure `iconify_full` (optional)
+### Step 5 — Configure `iconify_full` (optional)
 
 In your app `pubspec.yaml`:
 
@@ -71,23 +100,7 @@ iconify_full:
   cache: ../.iconify_cache
 ```
 
-### Step 4 — Register the generated manifest
-
-In `lib/main.dart` (before `runApp`):
-
-```dart
-import 'package:iconify_full/iconify_full.dart';
-import 'generated/iconify_manifest.g.dart' as iconify_manifest;
-
-void main() {
-  registerIconifyManifest(iconify_manifest.iconifyAssetFor);
-  runApp(const MyApp());
-}
-```
-
-The manifest file is **generated** by subsetting (Step 6). Commit it after the first successful subset, or regenerate on each build.
-
-### Step 5 — Use icons in widgets
+### Step 6 — Use icons in widgets
 
 ```dart
 import 'package:iconify_full/iconify_full.dart';
@@ -109,7 +122,7 @@ IconifyTheme(
 
 Icon ids use the form **`prefix:name`** (same as Iconify), e.g. `mdi:home`, `solar:star-bold`.
 
-### Step 6 — Subset icons (first time & when adding icons)
+### Step 7 — Subset icons (fills the manifest & assets)
 
 **Automatic (recommended):**
 
@@ -133,7 +146,9 @@ This:
 3. Writes `lib/generated/iconify_manifest.g.dart`
 4. Adds `assets/iconify/` to `pubspec.yaml` if missing
 
-### Step 7 — Desktop hooks (Windows & Linux, one-time per app)
+After you add `IconifyIcon('prefix:name')` in `lib/`, subset **replaces** the starter manifest with real entries and copies SVGs into `assets/iconify/`. This also runs automatically on native builds (see table below).
+
+### Step 8 — Desktop hooks (Windows & Linux, one-time per app)
 
 ```bash
 dart run iconify_full:iconify_apply_hooks --project .
@@ -141,7 +156,7 @@ dart run iconify_full:iconify_apply_hooks --project .
 
 This patches CMake so `flutter build windows` / `linux` subsets automatically.
 
-### Step 8 — Web builds
+### Step 9 — Web builds
 
 Gradle/CMake hooks do not run for web. Use:
 
@@ -152,7 +167,7 @@ dart run iconify_full:iconify_build -- build web
 
 This runs subset, then forwards to `flutter`.
 
-### Step 9 — Run or release
+### Step 10 — Run or release
 
 ```bash
 flutter run
@@ -196,6 +211,7 @@ Subset runs during the native build (Android/iOS) or run `dart run iconify_full:
 
 | Command | Purpose |
 |---------|---------|
+| `dart run iconify_full:iconify_init` | **First-time:** create empty `iconify_manifest.g.dart` |
 | `dart run iconify_full:iconify_download` | Download all (or `-p prefix`) sets to cache |
 | `dart run iconify_full:iconify_subset` | Subset used icons into app assets |
 | `dart run iconify_full:iconify_apply_hooks` | Patch Windows/Linux CMake (once per app) |
@@ -220,6 +236,10 @@ Subset runs during the native build (Android/iOS) or run `dart run iconify_full:
 
 ## Troubleshooting
 
+**`generated/iconify_manifest.g.dart` does not exist**
+
+- Run `dart run iconify_full:iconify_init` once, then add the import in `main.dart`.
+
 **Red broken-image placeholder**
 
 - Icon not in manifest → run subset after adding `IconifyIcon('prefix:name')`.
@@ -233,6 +253,12 @@ Subset runs during the native build (Android/iOS) or run `dart run iconify_full:
 
 - Ensure `iconify_full` is in `dependencies` (not only `dev_dependencies`).
 - Run `dart run iconify_full:iconify_subset` manually to see errors.
+
+**CMake: `iconify_subset` does not exist**
+
+- Old `iconify_apply_hooks` only patched `runner/CMakeLists.txt` with `add_dependencies` but not the target.
+- Re-run: `dart run iconify_full:iconify_apply_hooks --project .`
+- Or replace the `# >>> iconify_full` block in `windows/runner/CMakeLists.txt` (see package README / example app).
 
 **Cache not found**
 

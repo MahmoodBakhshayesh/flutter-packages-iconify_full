@@ -2,6 +2,7 @@
 library;
 
 export 'src/builder/auto_subset.dart' show runAutoSubset;
+export 'src/builder/init.dart' show runIconifyInit;
 export 'src/builder/config.dart' show IconifyFullConfig;
 export 'src/builder/download.dart' show runIconifyDownload;
 export 'src/builder/subset.dart' show runIconifySubset;

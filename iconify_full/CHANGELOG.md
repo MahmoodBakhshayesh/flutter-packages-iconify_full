@@ -1,3 +1,10 @@
+## 0.1.1
+
+* Added `iconify_init` CLI to create `lib/generated/iconify_manifest.g.dart` for new apps.
+* Fixed desktop CMake hooks: runner defines `iconify_subset` target (any app name).
+* `iconify_apply_hooks` detects any `project(...)` line and upgrades old runner patches.
+* Subset writes an empty manifest when no icons are found (with guidance).
+
 ## 0.1.0
 
 * Initial release.

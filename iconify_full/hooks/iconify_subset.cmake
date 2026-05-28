@@ -1,4 +1,5 @@
-# iconify_full — subset SVGs before desktop builds (included or inlined by apply_hooks).
+# Parent windows/linux CMakeLists — include after project().
+# ICONIFY_APP_ROOT = flutter project root (pubspec.yaml).
 if(NOT TARGET iconify_subset)
   set(ICONIFY_APP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
   set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
