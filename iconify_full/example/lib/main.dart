@@ -1,7 +1,8 @@
+import 'package:example/generated/iconify_catalog/iconify_catalog.dart';
+import 'package:example/generated/iconify_icons.g.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_full/iconify_full.dart';
 
-import 'generated/iconify_catalog/solar.dart';
 import 'generated/iconify_manifest.g.dart' as manifest;
 
 void main() {
@@ -84,8 +85,7 @@ class _IconifyExampleAppState extends State<IconifyExampleApp> {
 
 
 
-
-                      IconifyIcon("bi:amd"),
+                      IconifyIcon("solar:accumulator-bold"),
                       IconifyIcon.named(Solar.accumulator_bold,color: Colors.red,),
                       _labeled('mdi:home', IconifyIcon('mdi:home')),
                       _labeled(

@@ -2,7 +2,7 @@
 
 ### Fixed
 
-* **Android:** Replace Kotlin plugin stub with a **Java-only** implementation so `compileReleaseKotlin` vs `compileReleaseJavaWithJavac` JVM-target errors cannot occur on APK builds.
+* **Android:** Java-only plugin (no Kotlin) — fixes JVM 17/21 mismatch on APK builds (`compileReleaseKotlin` vs `compileReleaseJavaWithJavac`).
 
 ## 0.1.5
 
