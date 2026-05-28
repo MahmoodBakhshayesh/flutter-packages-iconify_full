@@ -1,3 +1,8 @@
+## 0.1.2
+
+* CMake / `iconify_apply_hooks`: try `../iconify_full/.iconify_cache` (monorepo layout like brewlab).
+* Scanner: ignore false positives such as `dart:async` in `prefix:name` pattern.
+
 ## 0.1.1
 
 * Added `iconify_init` CLI to create `lib/generated/iconify_manifest.g.dart` for new apps.

@@ -24,7 +24,7 @@ In your app `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  iconify_full: ^0.1.1
+  iconify_full: ^0.1.2
 ```
 
 Then:
@@ -93,11 +93,25 @@ iconify_full:
   auto_subset: true              # default
 ```
 
-For a monorepo with cache at repo root:
+For a monorepo with cache next to the `iconify_full` package (e.g. brewlab + iconify_full siblings):
 
 ```yaml
 iconify_full:
-  cache: ../.iconify_cache
+  cache: ../iconify_full/.iconify_cache
+```
+
+For cache in the app folder:
+
+```yaml
+iconify_full:
+  cache: .iconify_cache
+```
+
+Only `cache` is required when it is not `.iconify_cache` in the app root. Other keys match defaults and can be omitted:
+
+```yaml
+iconify_full:
+  cache: ../iconify_full/.iconify_cache
 ```
 
 ### Step 6 — Use icons in widgets

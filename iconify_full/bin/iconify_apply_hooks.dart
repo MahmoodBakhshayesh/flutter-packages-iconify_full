@@ -25,7 +25,10 @@ Future<void> main(List<String> arguments) async {
 /// Top-level windows/linux CMakeLists — app root is one level up.
 String get _parentHookBlock => r'''
 set(ICONIFY_APP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
-set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
+set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../iconify_full/.iconify_cache")
+if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
+  set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
+endif()
 if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
   set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/.iconify_cache")
 endif()
@@ -45,7 +48,10 @@ endif()
 /// runner/CMakeLists — app root is two levels up; defines target if parent did not.
 String get _runnerHookBlock => r'''
 set(ICONIFY_APP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
+set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../iconify_full/.iconify_cache")
+if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
+  set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/../.iconify_cache")
+endif()
 if(NOT EXISTS "${ICONIFY_CACHE_DIR}")
   set(ICONIFY_CACHE_DIR "${ICONIFY_APP_ROOT}/.iconify_cache")
 endif()

@@ -37,10 +37,11 @@ Set<String> scanProjectForIconIds(Directory libDir) {
       ids.add(iconId(prefix, name));
     }
 
-    // Only pick explicit prefix:name in IconifyIcon contexts to reduce noise
+    // Only pick explicit prefix:name near Iconify widgets; skip dart: imports etc.
     if (content.contains('Iconify')) {
       for (final match in patterns[2].allMatches(content)) {
         final id = match.group(1)!;
+        if (id.startsWith('dart:')) continue;
         if (parseIconId(id) != null) ids.add(id);
       }
     }
