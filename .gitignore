@@ -1,0 +1,16 @@
+# Full offline icon cache (download with: dart run iconify_full:iconify_download)
+.iconify_cache/
+
+# Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

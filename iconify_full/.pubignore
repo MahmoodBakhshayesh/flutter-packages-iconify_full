@@ -1,0 +1,12 @@
+# IDE / tooling
+.idea/
+*.iml
+.vscode/
+
+# Local analysis
+.dart_tool/
+build/
+
+# Not needed on pub.dev
+.metadata
+**/test/goldens/

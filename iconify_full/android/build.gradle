@@ -1,0 +1,58 @@
+group = "dev.iconify.full"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+
+android {
+    namespace = "dev.iconify.full"
+    compileSdk = 36
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    defaultConfig {
+        minSdk = 21
+    }
+}
+
+def registerIconifySubset = { Project appProject ->
+    def appRoot = appProject.projectDir.parentFile.parentFile
+    def cacheDir = new File(appRoot.parentFile, ".iconify_cache")
+    if (!cacheDir.exists()) {
+        cacheDir = new File(appRoot, ".iconify_cache")
+    }
+    def subset = appProject.tasks.register("iconifySubset", Exec) {
+        group = "iconify"
+        description = "Subset Iconify SVGs referenced in lib/ (iconify_full)"
+        workingDir = appRoot
+        commandLine "dart", "run", "iconify_full:iconify_subset",
+            "--project", ".",
+            "--cache", cacheDir.absolutePath,
+            "--no-pubspec"
+    }
+    appProject.tasks.matching { it.name == "preBuild" }.configureEach {
+        dependsOn(subset)
+    }
+}
+
+gradle.afterProject { Project project ->
+    if (project.plugins.hasPlugin("com.android.application")) {
+        registerIconifySubset(project)
+    }
+}
