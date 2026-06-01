@@ -9,7 +9,9 @@ import 'manifest_generator.dart';
 import 'scan.dart';
 import 'svg_export.dart';
 
-/// Copies used icons from [cacheDir] into [projectDir] and generates manifest.
+/// Scans `lib/` for icon references, copies SVGs into the app, and generates manifest.
+///
+/// Run via: `dart run iconify_full:iconify_subset`
 Future<void> runIconifySubset({
   required Directory projectDir,
   required Directory cacheDir,

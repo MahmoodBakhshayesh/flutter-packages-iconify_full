@@ -1,36 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
+import 'iconify_http.dart';
 import 'svg_export.dart';
 
-const _collectionsUrl =
-    'https://raw.githubusercontent.com/iconify/icon-sets/master/collections.json';
-const _jsonBaseUrl =
-    'https://raw.githubusercontent.com/iconify/icon-sets/master/json';
-const _maxAttempts = 5;
-const _retryDelay = Duration(seconds: 3);
-
-Future<http.Response> _getWithRetry(Uri url) async {
-  Object? lastError;
-  for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
-    try {
-      final response = await http.get(url).timeout(const Duration(minutes: 2));
-      if (response.statusCode == 200) return response;
-      lastError = HttpException('HTTP ${response.statusCode} for $url');
-    } on Exception catch (e) {
-      lastError = e;
-    }
-    if (attempt < _maxAttempts) {
-      await Future<void>.delayed(_retryDelay * attempt);
-    }
-  }
-  throw lastError ?? StateError('Failed to GET $url');
-}
-
-/// Downloads all Iconify collections and exports SVGs into [cacheDir].
+/// Downloads Iconify JSON from GitHub and writes SVGs into [cacheDir].
+///
+/// Run via: `dart run iconify_full:iconify_download`
+///
+/// Use [onlyPrefixes] to limit sets (e.g. `mdi`, `solar`) for faster downloads.
 Future<void> runIconifyDownload({
   required Directory cacheDir,
   List<String>? onlyPrefixes,
@@ -40,7 +20,8 @@ Future<void> runIconifyDownload({
   void info(String msg) => log?.call(msg);
 
   info('Fetching collections list…');
-  final collectionsResponse = await _getWithRetry(Uri.parse(_collectionsUrl));
+  final collectionsResponse =
+      await iconifyHttpGet(Uri.parse(iconifyCollectionsUrl));
 
   final collections =
       jsonDecode(collectionsResponse.body) as Map<String, dynamic>;
@@ -68,16 +49,15 @@ Future<void> runIconifyDownload({
     if (skipExisting && jsonFile.existsSync()) {
       set = jsonDecode(await jsonFile.readAsString()) as Map<String, dynamic>;
     } else {
-      final url = '$_jsonBaseUrl/$prefix.json';
-      late final http.Response response;
+      final url = '$iconifyJsonBaseUrl/$prefix.json';
       try {
-        response = await _getWithRetry(Uri.parse(url));
+        final response = await iconifyHttpGet(Uri.parse(url));
+        set = jsonDecode(response.body) as Map<String, dynamic>;
+        await jsonFile.writeAsString(response.body);
       } on Exception catch (e) {
         info('  skip: $e');
         continue;
       }
-      set = jsonDecode(response.body) as Map<String, dynamic>;
-      await jsonFile.writeAsString(response.body);
     }
 
     final palette = meta is Map && meta['palette'] == true;

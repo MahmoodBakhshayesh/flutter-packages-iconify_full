@@ -1,16 +1,14 @@
-/// Resolves bundled asset paths for Iconify ids.
+/// Resolves a bundled asset path for an Iconify id, or `null` if not in the subset.
 ///
-/// Apps generate `lib/generated/iconify_manifest.g.dart` via
-/// `dart run iconify_full:iconify_subset` and pass [iconifyAssetFor]
-/// here with [registerIconifyManifest].
+/// Typically the generated `iconifyAssetFor` from `iconify_manifest.g.dart`.
 typedef IconifyAssetResolver = String? Function(String id);
 
 IconifyAssetResolver _resolver = _defaultResolver;
 
-/// Default resolver — override via [registerIconifyManifest].
+/// Looks up the asset path for [id] using the registered [registerIconifyManifest].
 String? iconifyAssetFor(String id) => _resolver(id);
 
-/// Registers the generated `iconifyAssetFor` from the app manifest.
+/// Connects [iconifyAssetFor] to your generated manifest (call from `main()`).
 void registerIconifyManifest(IconifyAssetResolver resolver) {
   _resolver = resolver;
 }

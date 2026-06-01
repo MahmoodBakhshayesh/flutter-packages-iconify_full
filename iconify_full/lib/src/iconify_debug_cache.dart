@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 
-/// Registered in debug via [registerIconifyDebugCache] (ignored in release builds).
 String? _debugCachePath;
 
-/// Offline cache used when an icon is not yet in the release asset bundle.
-/// No-op in [kReleaseMode] — release builds rely on subset + [registerIconifyManifest].
+/// Points [IconifyIcon] at `.iconify_cache` in debug when an icon is missing from assets.
+///
+/// Ignored in release builds. Prefer [setupIconifyFull] with `debugCachePath`.
 void registerIconifyDebugCache(String cachePath) {
   if (kReleaseMode) return;
   _debugCachePath = cachePath;

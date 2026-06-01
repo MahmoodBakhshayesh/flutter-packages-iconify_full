@@ -1,0 +1,5 @@
+.dart_tool/
+build/
+lib/generated/iconify_catalog/
+lib/generated/iconify_icons.g.dart
+**/.iconify_cache/

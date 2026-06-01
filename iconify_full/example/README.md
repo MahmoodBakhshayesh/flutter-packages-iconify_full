@@ -1,21 +1,14 @@
 # iconify_full example
 
-Demo app (lives inside the package for pub.dev `example/` discovery).
+Demo app for the [iconify_full](https://pub.dev/packages/iconify_full) package.
 
-## Setup
+## Run
 
 ```bash
-# From this directory (iconify_full/example)
+cd example
 flutter pub get
-dart run iconify_full:iconify_init
-
-# Download cache at repo root (once)
-cd ../..
-dart run iconify_full:iconify_download --cache .iconify_cache
-
-cd iconify_full/example
-dart run iconify_full:iconify_subset
-flutter run -d windows
+flutter run
 ```
 
-Cache path in `pubspec.yaml`: `../../.iconify_cache` (repo root).
+Bundled icons use `IconifyIcon` (subset assets). The **Fast cached** tab uses
+`FastCachedIconify` and needs internet on first load per icon set.

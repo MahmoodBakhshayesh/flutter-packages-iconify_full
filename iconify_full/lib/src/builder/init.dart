@@ -6,7 +6,9 @@ import 'config.dart';
 import 'manifest_generator.dart';
 import 'subset.dart' show mergePubspecAssets;
 
-/// Creates [manifestPath] and optional assets entry for a new app.
+/// Creates a starter manifest and assets folder for a new Flutter app.
+///
+/// Run via: `dart run iconify_full:iconify_init`
 Future<void> runIconifyInit({
   required Directory projectDir,
   bool updatePubspec = true,

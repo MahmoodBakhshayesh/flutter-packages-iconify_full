@@ -13,6 +13,47 @@ Use [Iconify](https://icon-sets.iconify.design/) icons in Flutter as **themed SV
 - **Typed icons** — generated `Iconifies.*` (subset) or `Mdi.*` / `Solar.*` (full catalog via `iconify_codegen`)
 - **Tree-shaking** — subset copies only icons you reference in `lib/`
 - **Auto subset on build** — Android & iOS via plugin; Windows/Linux via CMake; web via `iconify_build`
+- **`FastCachedIconify`** — download icons on demand at runtime (like cached network images)
+
+---
+
+## FastCachedIconify (runtime download)
+
+Use when you need **any** Iconify id without bundling or pre-downloading full sets:
+
+```dart
+import 'package:iconify_full/iconify_full.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FastCachedIconify.ensureInitialized();
+  // optional: cachePath: '/custom/path'
+  runApp(const MyApp());
+}
+
+// In widgets:
+FastCachedIconify(
+  'mdi:account-circle',
+  size: 28,
+  color: Colors.blue,
+  placeholder: const SizedBox(
+    width: 28,
+    height: 28,
+    child: CircularProgressIndicator(strokeWidth: 2),
+  ),
+  errorWidget: const Icon(Icons.broken_image_outlined, size: 28),
+)
+```
+
+| | `IconifyIcon` | `FastCachedIconify` |
+|--|---------------|---------------------|
+| **Needs subset / assets** | Yes (release) | No |
+| **Network** | No (offline) | First load per icon/set |
+| **Best for** | Production, fixed icon set | Dynamic icons, prototypes, admin UIs |
+
+Cache layout (mobile/desktop): app support dir → `iconify_fast_cache/json/` + `svg/`. Web uses in-memory cache for the session.
+
+Requires **internet** on first use per icon set (JSON is cached per prefix).
 
 ---
 
@@ -26,7 +67,7 @@ In your app `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  iconify_full: ^0.1.6
+  iconify_full: ^0.1.7
 ```
 
 Then:
@@ -287,6 +328,7 @@ Subset runs during the native build (Android/iOS) or run `dart run iconify_full:
 
 | Type | Role |
 |------|------|
+| `FastCachedIconify('mdi:home')` | Widget — download + cache at runtime |
 | `IconifyIcon('mdi:home')` | Widget — manifest assets (release) or cache (debug) |
 | `IconifyIcon.named(Iconifies.mdi_home)` | Widget with generated typed ref |
 | `IconifyTheme` / `IconifyThemeData` | Default color, size, fit |

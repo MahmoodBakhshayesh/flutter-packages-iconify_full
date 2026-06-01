@@ -28,6 +28,7 @@ class IconifyTheme extends InheritedWidget {
 /// Default styling for Iconify SVG icons.
 @immutable
 class IconifyThemeData {
+  /// Creates default icon styling for descendants.
   const IconifyThemeData({
     this.color,
     this.size = 24,
@@ -36,12 +37,22 @@ class IconifyThemeData {
     this.alignment = Alignment.center,
   });
 
+  /// Tint color applied to monochrome SVGs (`currentColor`).
   final Color? color;
+
+  /// Width and height of the icon widget.
   final double size;
+
+  /// Accessibility label for the SVG.
   final String? semanticLabel;
+
+  /// How the SVG is fitted in its box.
   final BoxFit fit;
+
+  /// Alignment of the SVG within its box.
   final AlignmentGeometry alignment;
 
+  /// Merges this theme with [other], preferring non-null fields from [other].
   IconifyThemeData merge(IconifyThemeData? other) {
     if (other == null) return this;
     return IconifyThemeData(

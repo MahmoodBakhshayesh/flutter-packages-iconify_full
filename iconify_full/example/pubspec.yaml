@@ -18,18 +18,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
 
-iconify_full:
-  cache: ../../.iconify_cache
-  assets_dir: assets/iconify
-  manifest: lib/generated/iconify_manifest.g.dart
-
 flutter:
   uses-material-design: true
   assets:
-# >>> iconify_full assets
     - assets/iconify/mdi/home.svg
     - assets/iconify/mdi/heart.svg
-    - assets/iconify/tabler/brand-flutter.svg
-    - assets/iconify/solar/star-bold.svg
-    - assets/iconify/solar/accumulator-bold.svg
-# <<< iconify_full assets

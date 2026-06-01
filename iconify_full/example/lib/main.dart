@@ -1,4 +1,3 @@
-import 'package:example/generated/iconify_catalog/iconify_catalog.dart';
 import 'package:example/generated/iconify_icons.g.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_full/iconify_full.dart';
@@ -85,8 +84,10 @@ class _IconifyExampleAppState extends State<IconifyExampleApp> {
 
 
 
-                      IconifyIcon("solar:accumulator-bold"),
-                      IconifyIcon.named(Solar.accumulator_bold,color: Colors.red,),
+                      FastCachedIconify("solar:accumulator-bold"),
+                      FastCachedIconify('fluent-emoji-high-contrast:pouring-liquid'),
+                      FastCachedIconify('emojione-monotone:fish-cake-with-swirl'),
+
                       _labeled('mdi:home', IconifyIcon('mdi:home')),
                       _labeled(
                         'mdi:heart',

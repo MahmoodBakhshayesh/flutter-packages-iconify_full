@@ -127,7 +127,9 @@ Map<String, String> exportIconSet(
   return out;
 }
 
-/// Parses `prefix:name` or `prefix/name`.
+/// Parses an Iconify id such as `mdi:home` or `mdi/home`.
+///
+/// Returns `(prefix, name)` or `null` if the format is invalid.
 (String prefix, String name)? parseIconId(String id) {
   final trimmed = id.trim();
   if (trimmed.isEmpty) return null;
@@ -145,4 +147,5 @@ Map<String, String> exportIconSet(
   return (prefix, name);
 }
 
+/// Canonical Iconify id string: `prefix:name`.
 String iconId(String prefix, String name) => '$prefix:$name';

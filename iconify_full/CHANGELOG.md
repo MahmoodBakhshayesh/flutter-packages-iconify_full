@@ -1,3 +1,19 @@
+## 0.1.7
+
+### Added
+
+* **`FastCachedIconify`** — runtime download + disk/memory cache for any `prefix:name` icon (no subset). First load fetches from Iconify GitHub; later loads use cache. Call `FastCachedIconify.ensureInitialized()` in `main`. Supports custom **`placeholder`** (loading) and **`errorWidget`** (invalid id, download failure, or missing icon).
+
+### Changed
+
+* **pub.dev:** Ship `example/` app; declare Android, iOS, Web, Windows, macOS plugin platforms.
+* Expanded `dartdoc` on public API ([IconifyFullConfig], CLI helpers, widgets).
+
+### Fixed
+
+* **FastCachedIconify:** UI updates when the first download finishes (no longer stuck on [placeholder] until hot reload).
+* Export [IconifyFullPlugin] from main library (fixes Windows/Linux/macOS `dart_plugin_registrant` build).
+
 ## 0.1.6
 
 ### Fixed
