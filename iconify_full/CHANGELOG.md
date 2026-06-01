@@ -1,3 +1,10 @@
+## 0.1.8
+
+### Fixed
+
+* **Codegen:** sanitize both prefix and icon name in generated `Iconifies.*` constants (hyphens now become underscores, e.g. `fluent_emoji_high_contrast_pouring_liquid`).
+* **FastCachedIconify:** reliably refreshes from placeholder to icon after first download (no manual refresh needed).
+
 ## 0.1.7
 
 ### Added

@@ -86,4 +86,4 @@ String dartFieldName(String iconName) {
 
 /// Legacy flat name used by subset `Iconifies` (`mdi_home`).
 String iconRefFieldName(String prefix, String name) =>
-    '${prefix}_${dartFieldName(name)}';
+    '${dartFieldName(prefix)}_${dartFieldName(name)}';

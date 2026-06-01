@@ -67,7 +67,7 @@ In your app `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  iconify_full: ^0.1.7
+  iconify_full: ^0.1.8
 ```
 
 Then:

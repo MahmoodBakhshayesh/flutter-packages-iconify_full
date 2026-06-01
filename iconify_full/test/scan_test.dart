@@ -41,11 +41,22 @@ class Iconifies {
   });
 
   test('generateIconifyIconsDart emits IconifyIconRef constants', () {
-    final dart = generateIconifyIconsDart(['mdi:home', 'solar:star-bold']);
+    final dart = generateIconifyIconsDart([
+      'mdi:home',
+      'solar:star-bold',
+      'fluent-emoji-high-contrast:pouring-liquid',
+    ]);
     expect(dart, contains("static const mdi_home = IconifyIconRef('mdi', 'home');"));
     expect(
       dart,
       contains("static const solar_star_bold = IconifyIconRef('solar', 'star-bold');"),
+    );
+    expect(
+      dart,
+      contains(
+        "static const fluent_emoji_high_contrast_pouring_liquid = "
+        "IconifyIconRef('fluent-emoji-high-contrast', 'pouring-liquid');",
+      ),
     );
   });
 }
