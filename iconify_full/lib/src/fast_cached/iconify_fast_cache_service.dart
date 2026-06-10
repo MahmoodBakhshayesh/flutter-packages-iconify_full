@@ -56,6 +56,9 @@ class IconifyFastCacheService {
   /// Clears the in-memory SVG cache (disk files are kept).
   void clearMemory() => _memory.clear();
 
+  /// Synchronous lookup — returns cached SVG XML without network/disk I/O.
+  String? peekSvg(String iconId) => _memory[iconId.trim()];
+
   /// Returns SVG XML for [iconId], downloading and caching on first use.
   ///
   /// Returns `null` if [iconId] is invalid or the icon does not exist.

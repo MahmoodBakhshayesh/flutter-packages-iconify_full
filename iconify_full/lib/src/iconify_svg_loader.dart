@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'builder/svg_export.dart';
 import 'iconify_debug_cache.dart';
+import 'iconify_picture_cache.dart';
 import 'iconify_svg_loader_io.dart' if (dart.library.html) 'iconify_svg_loader_web.dart' as io;
 import 'iconify_theme.dart';
 
@@ -16,31 +16,33 @@ Widget? tryBuildIconifySvg({
   String? package,
 }) {
   final tint = _resolveTint(resolved, context);
+  final cache = IconifyPictureCache.instance;
 
   if (assetPath != null) {
-    return SvgPicture.asset(
-      assetPath,
+    return cache.asset(
+      assetPath: assetPath,
       package: package,
       width: resolved.size,
       height: resolved.size,
+      tint: tint,
       fit: resolved.fit,
       alignment: resolved.alignment,
       semanticsLabel: resolved.semanticLabel,
-      colorFilter: tint != null ? ColorFilter.mode(tint, BlendMode.srcIn) : null,
     );
   }
 
   if (iconifyDebugCacheEnabled) {
     final svg = io.readSvgFromDebugCache(iconId, iconifyDebugCachePath!);
     if (svg != null) {
-      return SvgPicture.string(
-        svg,
+      return cache.string(
+        svg: svg,
+        sourceId: iconId,
         width: resolved.size,
         height: resolved.size,
+        tint: tint,
         fit: resolved.fit,
         alignment: resolved.alignment,
         semanticsLabel: resolved.semanticLabel,
-        colorFilter: tint != null ? ColorFilter.mode(tint, BlendMode.srcIn) : null,
       );
     }
   }

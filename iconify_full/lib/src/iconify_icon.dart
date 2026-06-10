@@ -6,7 +6,7 @@ import 'iconify_svg_loader.dart';
 import 'iconify_theme.dart';
 
 /// Renders an Iconify icon from bundled assets (release) or the offline cache (debug).
-class IconifyIcon extends StatelessWidget {
+class IconifyIcon extends StatefulWidget {
   /// String id: `mdi:home` (not a const constructor — use [IconifyIcon.named] for `const`).
   IconifyIcon(
     String id, {
@@ -44,23 +44,31 @@ class IconifyIcon extends StatelessWidget {
   String get iconId => ref.id;
 
   @override
+  State<IconifyIcon> createState() => _IconifyIconState();
+}
+
+class _IconifyIconState extends State<IconifyIcon> {
+  @override
   Widget build(BuildContext context) {
     final inherited = IconifyTheme.maybeOf(context);
     final resolved = IconifyThemeData(
-      color: color ?? inherited?.color,
-      size: size ?? inherited?.size ?? 24,
-      semanticLabel: semanticLabel ?? inherited?.semanticLabel,
-      fit: fit ?? inherited?.fit ?? BoxFit.contain,
-      alignment: alignment ?? inherited?.alignment ?? Alignment.center,
+      color: widget.color ?? inherited?.color,
+      size: widget.size ?? inherited?.size ?? 24,
+      semanticLabel: widget.semanticLabel ?? inherited?.semanticLabel,
+      fit: widget.fit ?? inherited?.fit ?? BoxFit.contain,
+      alignment: widget.alignment ?? inherited?.alignment ?? Alignment.center,
     );
 
-    return tryBuildIconifySvg(
-          iconId: iconId,
-          resolved: resolved,
-          context: context,
-          assetPath: iconifyAssetFor(iconId),
-          package: package,
-        ) ??
-        buildIconifyMissing(context, resolved, iconId);
+    final svg = tryBuildIconifySvg(
+      iconId: widget.iconId,
+      resolved: resolved,
+      context: context,
+      assetPath: iconifyAssetFor(widget.iconId),
+      package: widget.package,
+    );
+
+    return RepaintBoundary(
+      child: svg ?? buildIconifyMissing(context, resolved, widget.iconId),
+    );
   }
 }

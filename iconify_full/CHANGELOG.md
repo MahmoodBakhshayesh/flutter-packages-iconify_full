@@ -1,3 +1,9 @@
+## 0.1.9
+
+### Fixed
+
+* **Rebuild flicker:** cache [SvgPicture] instances and hydrate [FastCachedIconify] from memory before showing placeholder — icons no longer flash on parent rebuilds.
+
 ## 0.1.8
 
 ### Fixed

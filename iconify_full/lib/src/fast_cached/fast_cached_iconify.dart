@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../iconify_icon_ref.dart';
+import '../iconify_picture_cache.dart';
 import '../iconify_theme.dart';
 import 'iconify_fast_cache_service.dart';
 
@@ -21,21 +21,6 @@ enum FastCachedIconifyError {
 ///
 /// Pass [placeholder] while loading and [errorWidget] when the id is invalid or
 /// the icon could not be loaded (similar to `CachedNetworkImage`).
-///
-/// ```dart
-/// await FastCachedIconify.ensureInitialized();
-///
-/// FastCachedIconify(
-///   'mdi:account',
-///   size: 32,
-///   placeholder: const SizedBox(
-///     width: 32,
-///     height: 32,
-///     child: CircularProgressIndicator(strokeWidth: 2),
-///   ),
-///   errorWidget: const Icon(Icons.broken_image_outlined),
-/// )
-/// ```
 class FastCachedIconify extends StatefulWidget {
   FastCachedIconify(
     String id, {
@@ -98,7 +83,7 @@ class FastCachedIconify extends StatefulWidget {
 }
 
 class _FastCachedIconifyState extends State<FastCachedIconify> {
-  bool _loading = true;
+  bool _loading = false;
   String? _svg;
   Object? _loadError;
   FastCachedIconifyError? _invalidReason;
@@ -107,7 +92,10 @@ class _FastCachedIconifyState extends State<FastCachedIconify> {
   @override
   void initState() {
     super.initState();
-    _startLoad();
+    _hydrateFromMemoryCache();
+    if (!_hasRenderableSvg && _invalidReason == null) {
+      _startLoad();
+    }
   }
 
   @override
@@ -115,29 +103,56 @@ class _FastCachedIconifyState extends State<FastCachedIconify> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.iconId != widget.iconId ||
         oldWidget.cachePath != widget.cachePath) {
-      _startLoad();
+      _hydrateFromMemoryCache();
+      if (!_hasRenderableSvg && _invalidReason == null) {
+        _startLoad();
+      }
     }
   }
 
-  void _startLoad() {
+  bool get _hasRenderableSvg => _svg != null && _svg!.isNotEmpty;
+
+  void _hydrateFromMemoryCache() {
     if (!widget.hasValidId) {
-      setState(() {
-        _loadGeneration++;
-        _invalidReason = FastCachedIconifyError.invalidId;
-        _loading = false;
-        _svg = null;
-        _loadError = null;
-      });
+      _invalidReason = FastCachedIconifyError.invalidId;
+      _loading = false;
+      _svg = null;
+      _loadError = null;
+      return;
+    }
+
+    _invalidReason = null;
+    _loadError = null;
+    final cached = IconifyFastCacheService.instance.peekSvg(widget.iconId);
+    if (cached != null) {
+      _svg = cached;
+      _loading = false;
+      return;
+    }
+
+    _svg = null;
+    _loading = true;
+  }
+
+  void _startLoad() {
+    if (!widget.hasValidId) return;
+
+    final cached = IconifyFastCacheService.instance.peekSvg(widget.iconId);
+    if (cached != null) {
+      if (!_hasRenderableSvg || _svg != cached) {
+        setState(() {
+          _svg = cached;
+          _loading = false;
+          _loadError = null;
+        });
+      }
       return;
     }
 
     final generation = ++_loadGeneration;
-    setState(() {
-      _invalidReason = null;
-      _loading = true;
-      _svg = null;
-      _loadError = null;
-    });
+    if (!_loading) {
+      setState(() => _loading = true);
+    }
 
     final service = IconifyFastCacheService.instance;
     () async {
@@ -179,7 +194,7 @@ class _FastCachedIconifyState extends State<FastCachedIconify> {
       );
     }
 
-    if (_loading) {
+    if (_loading && !_hasRenderableSvg) {
       return _slot(
         widget.placeholder ?? _defaultPlaceholder(resolved.size),
         resolved.size,
@@ -203,15 +218,17 @@ class _FastCachedIconifyState extends State<FastCachedIconify> {
     }
 
     final tint = _resolveTint(resolved, context);
-    return SvgPicture.string(
-      svg,
-      width: resolved.size,
-      height: resolved.size,
-      fit: resolved.fit,
-      alignment: resolved.alignment,
-      semanticsLabel: resolved.semanticLabel,
-      colorFilter:
-          tint != null ? ColorFilter.mode(tint, BlendMode.srcIn) : null,
+    return RepaintBoundary(
+      child: IconifyPictureCache.instance.string(
+        svg: svg,
+        sourceId: widget.iconId,
+        width: resolved.size,
+        height: resolved.size,
+        tint: tint,
+        fit: resolved.fit,
+        alignment: resolved.alignment,
+        semanticsLabel: resolved.semanticLabel,
+      ),
     );
   }
 
