@@ -1,15 +1,23 @@
 import 'dart:io';
 
+import 'icon_ref_registry.dart' show loadStaticIconRefMap;
 import 'svg_export.dart';
+
+export 'icon_ref_registry.dart' show loadStaticIconRefMap;
 
 /// Finds Iconify icon ids referenced in Dart sources under [libDir].
 Set<String> scanProjectForIconIds(
   Directory libDir, {
   Map<String, String> iconifiesMap = const {},
   Map<String, String> catalogMap = const {},
+  Map<String, String> staticRefMap = const {},
 }) {
   final ids = <String>{};
   if (!libDir.existsSync()) return ids;
+
+  final resolvedStaticRefs = staticRefMap.isEmpty
+      ? loadStaticIconRefMap(libDir)
+      : staticRefMap;
 
   final patterns = <RegExp>[
     // IconifyIcon('mdi:home')
@@ -20,7 +28,7 @@ Set<String> scanProjectForIconIds(
     RegExp(
       r'''IconifyIcon(?:\.named)?\s*\(\s*Iconifies\.([a-zA-Z0-9_]+)''',
     ),
-    // IconifyIcon.named(Mdi.home) or IconifyIcon(Mdi.home)
+    // IconifyIcon(SvgAssets.explore), IconifyIcon.named(Mdi.home)
     RegExp(
       r'''IconifyIcon(?:\.named)?\s*\(\s*([A-Z][a-zA-Z0-9]*)\.([a-zA-Z0-9_]+)''',
     ),
@@ -31,6 +39,10 @@ Set<String> scanProjectForIconIds(
     // const iconId = 'mdi:home' with nearby Iconify comment (optional)
     RegExp(
       r'''['"]([a-z0-9_-]+:[a-z0-9_.-]+)['"]''',
+    ),
+    // FastCachedIconify('mdi:home') or FastCachedIconify(SvgAssets.home)
+    RegExp(
+      r'''FastCachedIconify(?:\.named)?\s*\(\s*(?:['"]([^'"]+)['"]|([A-Z][a-zA-Z0-9]*)\.([a-zA-Z0-9_]+))''',
     ),
   ];
 
@@ -44,21 +56,19 @@ Set<String> scanProjectForIconIds(
     final content = entity.readAsStringSync();
 
     for (final match in patterns[0].allMatches(content)) {
-      final id = match.group(1)!;
-      if (parseIconId(id) != null) ids.add(id);
+      final id = normalizeIconIdString(match.group(1)!);
+      if (id != null) ids.add(id);
     }
 
     for (final match in patterns[1].allMatches(content)) {
       final field = match.group(1)!;
       final id = iconifiesMap[field];
-      if (id != null) {
-        ids.add(id);
-      }
+      if (id != null) ids.add(id);
     }
 
     for (final match in patterns[2].allMatches(content)) {
       final key = '${match.group(1)!}.${match.group(2)!}';
-      final id = catalogMap[key];
+      final id = catalogMap[key] ?? resolvedStaticRefs[key];
       if (id != null) ids.add(id);
     }
 
@@ -72,8 +82,21 @@ Set<String> scanProjectForIconIds(
       for (final match in patterns[4].allMatches(content)) {
         final id = match.group(1)!;
         if (id.startsWith('dart:')) continue;
-        if (parseIconId(id) != null) ids.add(id);
+        final normalized = normalizeIconIdString(id);
+        if (normalized != null) ids.add(normalized);
       }
+    }
+
+    for (final match in patterns[5].allMatches(content)) {
+      final literal = match.group(1);
+      if (literal != null) {
+        final id = normalizeIconIdString(literal);
+        if (id != null) ids.add(id);
+        continue;
+      }
+      final key = '${match.group(2)!}.${match.group(3)!}';
+      final id = catalogMap[key] ?? resolvedStaticRefs[key];
+      if (id != null) ids.add(id);
     }
   }
 

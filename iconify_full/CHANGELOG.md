@@ -1,3 +1,10 @@
+## 0.1.10
+
+### Added
+
+* **Subset scanner:** resolves `IconifyIcon(SvgAssets.field)` when icons are defined as `static const String` in your own classes (e.g. `SvgAssets.explore`).
+* **`normalizeIconIdString`:** accepts `prefix--name` (double dash) in addition to `prefix:name` and `prefix/name` — used by the scanner and `IconifyIconRef.fromId`.
+
 ## 0.1.9
 
 ### Fixed

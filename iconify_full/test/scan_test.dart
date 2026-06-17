@@ -2,8 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iconify_full/src/builder/icons_generator.dart';
-import 'package:iconify_full/src/builder/scan.dart';
-import 'package:path/path.dart' as p;
+import 'package:iconify_full/src/builder/scan.dart';import 'package:path/path.dart' as p;
 
 void main() {
   test('scan finds string and Iconifies references', () async {
@@ -38,6 +37,54 @@ class Iconifies {
     final ids = scanProjectForIconIds(lib, iconifiesMap: map);
 
     expect(ids, containsAll(['mdi:home', 'mdi:heart']));
+  });
+
+  test('scan resolves static const icon refs like SvgAssets.explore', () async {
+    final tmp = await Directory.systemTemp.createTemp('iconify_scan_');
+    addTearDown(() => tmp.deleteSync(recursive: true));
+
+    final lib = Directory(p.join(tmp.path, 'lib'));
+    await lib.create(recursive: true);
+    await File(p.join(lib.path, 'svg_assets.dart')).writeAsString('''
+class SvgAssets {
+  const SvgAssets._();
+
+  static const String coffee = 'ph--coffee';
+  static const String explore = 'solar:compass-broken';
+  static const String home = 'solar--home-2-broken';
+}
+''');
+    await File(p.join(lib.path, 'page.dart')).writeAsString('''
+import 'package:iconify_full/iconify_full.dart';
+import 'svg_assets.dart';
+
+class Page {
+  Widget build() => IconifyIcon(SvgAssets.explore);
+}
+''');
+
+    final ids = scanProjectForIconIds(lib);
+
+    expect(ids, {'solar:compass-broken'});
+  });
+
+  test('loadStaticIconRefMap normalizes const icon ids', () async {
+    final tmp = await Directory.systemTemp.createTemp('iconify_scan_');
+    addTearDown(() => tmp.deleteSync(recursive: true));
+
+    final lib = Directory(p.join(tmp.path, 'lib'));
+    await lib.create(recursive: true);
+    await File(p.join(lib.path, 'svg_assets.dart')).writeAsString('''
+class SvgAssets {
+  static const String coffee = 'ph--coffee';
+  static const String explore = 'solar:compass-broken';
+}
+''');
+
+    final map = loadStaticIconRefMap(lib);
+
+    expect(map['SvgAssets.coffee'], 'ph:coffee');
+    expect(map['SvgAssets.explore'], 'solar:compass-broken');
   });
 
   test('generateIconifyIconsDart emits IconifyIconRef constants', () {

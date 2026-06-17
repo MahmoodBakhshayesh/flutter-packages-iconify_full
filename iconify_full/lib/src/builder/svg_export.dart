@@ -127,24 +127,49 @@ Map<String, String> exportIconSet(
   return out;
 }
 
-/// Parses an Iconify id such as `mdi:home` or `mdi/home`.
+/// Parses an Iconify id such as `mdi:home`, `mdi/home`, or `ph--coffee`.
 ///
 /// Returns `(prefix, name)` or `null` if the format is invalid.
 (String prefix, String name)? parseIconId(String id) {
-  final trimmed = id.trim();
-  if (trimmed.isEmpty) return null;
-  final sep = trimmed.contains(':')
-      ? ':'
-      : trimmed.contains('/')
-          ? '/'
-          : null;
-  if (sep == null) return null;
-  final parts = trimmed.split(sep);
-  if (parts.length != 2) return null;
-  final prefix = parts[0].trim();
-  final name = parts[1].trim();
-  if (prefix.isEmpty || name.isEmpty) return null;
+  final normalized = normalizeIconIdString(id);
+  if (normalized == null) return null;
+  final sep = normalized.indexOf(':');
+  final prefix = normalized.substring(0, sep);
+  final name = normalized.substring(sep + 1);
   return (prefix, name);
+}
+
+/// Accepts `mdi:home`, `mdi/home`, or `ph--coffee` and returns `prefix:name`.
+String? normalizeIconIdString(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+
+  if (trimmed.contains(':')) {
+    final parts = trimmed.split(':');
+    if (parts.length == 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      return iconId(parts[0].trim(), parts[1].trim());
+    }
+    return null;
+  }
+
+  if (trimmed.contains('/')) {
+    final parts = trimmed.split('/');
+    if (parts.length == 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      return iconId(parts[0].trim(), parts[1].trim());
+    }
+    return null;
+  }
+
+  final dashSep = trimmed.indexOf('--');
+  if (dashSep > 0 && dashSep < trimmed.length - 2) {
+    final prefix = trimmed.substring(0, dashSep).trim();
+    final name = trimmed.substring(dashSep + 2).trim();
+    if (prefix.isNotEmpty && name.isNotEmpty) {
+      return iconId(prefix, name);
+    }
+  }
+
+  return null;
 }
 
 /// Canonical Iconify id string: `prefix:name`.

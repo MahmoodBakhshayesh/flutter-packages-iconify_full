@@ -32,7 +32,7 @@ export 'src/builder/config.dart' show IconifyFullConfig;
 export 'src/builder/download.dart' show runIconifyDownload;
 export 'src/builder/init.dart' show runIconifyInit;
 export 'src/builder/subset.dart' show runIconifySubset;
-export 'src/builder/svg_export.dart' show iconId, parseIconId;
+export 'src/builder/svg_export.dart' show iconId, normalizeIconIdString, parseIconId;
 export 'src/fast_cached/fast_cached_iconify.dart';
 export 'src/fast_cached/iconify_fast_cache_service.dart';
 export 'src/iconify_debug_cache.dart' show registerIconifyDebugCache;

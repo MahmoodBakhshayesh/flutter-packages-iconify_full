@@ -241,7 +241,7 @@ dart run iconify_full:iconify_subset
 
 This:
 
-1. Scans `lib/**/*.dart` for `IconifyIcon('…')` and `Iconifies.*` references
+1. Scans `lib/**/*.dart` for `IconifyIcon('…')`, `IconifyIcon(SvgAssets.field)`, `Iconifies.*`, and catalog refs (`Mdi.home`, etc.)
 2. Copies matching SVGs to `assets/iconify/`
 3. Writes `lib/generated/iconify_manifest.g.dart` and `iconify_icons.g.dart`
 4. Adds `assets/iconify/` to `pubspec.yaml` if missing

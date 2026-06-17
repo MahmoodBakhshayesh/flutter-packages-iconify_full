@@ -53,6 +53,14 @@ void main() {
   test('parseIconId', () {
     expect(parseIconId('mdi:home'), ('mdi', 'home'));
     expect(parseIconId('mdi/home'), ('mdi', 'home'));
+    expect(parseIconId('ph--coffee'), ('ph', 'coffee'));
     expect(parseIconId('invalid'), isNull);
+  });
+
+  test('normalizeIconIdString', () {
+    expect(normalizeIconIdString('mdi:home'), 'mdi:home');
+    expect(normalizeIconIdString('ph--coffee'), 'ph:coffee');
+    expect(normalizeIconIdString('fluent--people-32-regular'), 'fluent:people-32-regular');
+    expect(normalizeIconIdString('invalid'), isNull);
   });
 }
