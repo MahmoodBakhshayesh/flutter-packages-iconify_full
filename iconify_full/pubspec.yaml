@@ -3,7 +3,7 @@ description: >
   Offline Iconify icons for Flutter — themed SVG widgets, local cache of 200+
   open icon sets, and automatic build-time subsetting so apps only bundle
   icons they use.
-version: 0.1.10
+version: 0.1.11
 homepage: https://github.com/MahmoodBakhshayesh/flutter-packages-iconify_full
 repository: https://github.com/MahmoodBakhshayesh/flutter-packages-iconify_full
 issue_tracker: https://github.com/MahmoodBakhshayesh/flutter-packages-iconify_full/issues

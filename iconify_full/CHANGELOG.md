@@ -1,3 +1,9 @@
+## 0.1.11
+
+### Fixed
+
+* **Subset scanner:** detects icon references inside `IconifyIcon(...)` conditional expressions, such as `isSaved ? SvgAssets.bookmarked : SvgAssets.bookmark`, so both branches are included in generated assets.
+
 ## 0.1.10
 
 ### Added

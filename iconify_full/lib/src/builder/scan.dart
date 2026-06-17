@@ -98,7 +98,48 @@ Set<String> scanProjectForIconIds(
       final id = catalogMap[key] ?? resolvedStaticRefs[key];
       if (id != null) ids.add(id);
     }
+
+    _addIconRefsFromWidgetArguments(
+      content,
+      ids: ids,
+      iconifiesMap: iconifiesMap,
+      catalogMap: catalogMap,
+      staticRefMap: resolvedStaticRefs,
+    );
   }
 
   return ids;
+}
+
+final _iconWidgetCall = RegExp(
+  r'''(?:IconifyIcon|FastCachedIconify)(?:\.named)?\s*\(([\s\S]*?)\)''',
+);
+final _qualifiedRef = RegExp(r'''([A-Z][a-zA-Z0-9]*)\.([a-zA-Z0-9_]+)''');
+final _quotedIconId = RegExp(r'''['"]([^'"]+)['"]''');
+
+void _addIconRefsFromWidgetArguments(
+  String content, {
+  required Set<String> ids,
+  required Map<String, String> iconifiesMap,
+  required Map<String, String> catalogMap,
+  required Map<String, String> staticRefMap,
+}) {
+  for (final call in _iconWidgetCall.allMatches(content)) {
+    final args = call.group(1)!;
+
+    for (final literal in _quotedIconId.allMatches(args)) {
+      final id = normalizeIconIdString(literal.group(1)!);
+      if (id != null) ids.add(id);
+    }
+
+    for (final ref in _qualifiedRef.allMatches(args)) {
+      final className = ref.group(1)!;
+      final field = ref.group(2)!;
+
+      final id = className == 'Iconifies'
+          ? iconifiesMap[field]
+          : catalogMap['$className.$field'] ?? staticRefMap['$className.$field'];
+      if (id != null) ids.add(id);
+    }
+  }
 }

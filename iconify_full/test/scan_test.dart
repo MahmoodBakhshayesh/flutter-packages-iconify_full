@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iconify_full/src/builder/icons_generator.dart';
-import 'package:iconify_full/src/builder/scan.dart';import 'package:path/path.dart' as p;
+import 'package:iconify_full/src/builder/scan.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   test('scan finds string and Iconifies references', () async {
@@ -85,6 +86,44 @@ class SvgAssets {
 
     expect(map['SvgAssets.coffee'], 'ph:coffee');
     expect(map['SvgAssets.explore'], 'solar:compass-broken');
+  });
+
+  test('scan resolves static const refs inside conditional IconifyIcon args', () async {
+    final tmp = await Directory.systemTemp.createTemp('iconify_scan_');
+    addTearDown(() => tmp.deleteSync(recursive: true));
+
+    final lib = Directory(p.join(tmp.path, 'lib'));
+    await lib.create(recursive: true);
+    await File(p.join(lib.path, 'svg_assets.dart')).writeAsString('''
+class SvgAssets {
+  static const String bookmark = 'solar--bookmark-broken';
+  static const String bookmarked = 'solar:bookmark-bold';
+}
+
+class AppColors {
+  static const honeyBrown = 0;
+  static const mediumBrown = 1;
+}
+''');
+    await File(p.join(lib.path, 'page.dart')).writeAsString('''
+import 'package:iconify_full/iconify_full.dart';
+import 'svg_assets.dart';
+
+class Page {
+  Widget build(CoffeeDetails coffeeDetails) => IconifyIcon(
+    coffeeDetails.isSavedByMe ? SvgAssets.bookmarked : SvgAssets.bookmark,
+    color: coffeeDetails.isSavedByMe ? AppColors.honeyBrown : AppColors.mediumBrown,
+  );
+}
+
+class CoffeeDetails {
+  bool get isSavedByMe => false;
+}
+''');
+
+    final ids = scanProjectForIconIds(lib);
+
+    expect(ids, {'solar:bookmark-bold', 'solar:bookmark-broken'});
   });
 
   test('generateIconifyIconsDart emits IconifyIconRef constants', () {

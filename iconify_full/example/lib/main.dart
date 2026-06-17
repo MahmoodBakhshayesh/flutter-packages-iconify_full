@@ -1,4 +1,3 @@
-import 'package:example/generated/iconify_icons.g.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_full/iconify_full.dart';
 
