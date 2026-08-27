@@ -12,9 +12,11 @@ Pod::Spec.new do |s|
   s.platform = :ios, '13.0'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.swift_version = '5.0'
+  # Ruby 4 / CocoaPods: comma must follow the heredoc identifier, not a
+  # standalone line after SCRIPT (that used to parse on Ruby 3).
   s.script_phase = {
     :name => 'Iconify Subset',
-    :script => <<-SCRIPT
+    :script => <<-SCRIPT,
 set -e
 APP_ROOT="${SRCROOT}/.."
 CACHE="${APP_ROOT}/../.iconify_cache"
@@ -24,7 +26,6 @@ fi
 cd "${APP_ROOT}"
 dart run iconify_full:iconify_subset --project . --cache "${CACHE}" --no-pubspec
 SCRIPT
-    ,
     :execution_position => :before_compile,
     :always_out_of_date => '1'
   }
